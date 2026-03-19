@@ -73,7 +73,7 @@ class AgentAction:
 
 @dataclass
 class RoundSummary:
-    """每轮摘要"""
+    """per round摘要"""
     round_num: int
     start_time: str
     end_time: Optional[str] = None
@@ -109,7 +109,7 @@ class SimulationRunState:
     simulated_hours: int = 0
     total_simulation_hours: int = 0
     
-    # 各平台独立轮次和模拟时间（用于双平台并行显示）
+    # 各平台独立round和模拟时间（用于双平台并行显示）
     twitter_current_round: int = 0
     reddit_current_round: int = 0
     twitter_simulated_hours: int = 0
@@ -125,7 +125,7 @@ class SimulationRunState:
     twitter_completed: bool = False
     reddit_completed: bool = False
     
-    # 每轮摘要
+    # per round摘要
     rounds: List[RoundSummary] = field(default_factory=list)
     
     # 最近动作（用于前端实时展示）
@@ -165,7 +165,7 @@ class SimulationRunState:
             "simulated_hours": self.simulated_hours,
             "total_simulation_hours": self.total_simulation_hours,
             "progress_percent": round(self.current_round / max(self.total_rounds, 1) * 100, 1),
-            # 各平台独立轮次和时间
+            # 各平台独立round和时间
             "twitter_current_round": self.twitter_current_round,
             "reddit_current_round": self.reddit_current_round,
             "twitter_simulated_hours": self.twitter_simulated_hours,
@@ -256,7 +256,7 @@ class SimulationRunner:
                 total_rounds=data.get("total_rounds", 0),
                 simulated_hours=data.get("simulated_hours", 0),
                 total_simulation_hours=data.get("total_simulation_hours", 0),
-                # 各平台独立轮次和时间
+                # 各平台独立round和时间
                 twitter_current_round=data.get("twitter_current_round", 0),
                 reddit_current_round=data.get("reddit_current_round", 0),
                 twitter_simulated_hours=data.get("twitter_simulated_hours", 0),
@@ -313,9 +313,9 @@ class SimulationRunner:
         cls,
         simulation_id: str,
         platform: str = "parallel",  # twitter / reddit / parallel
-        max_rounds: int = None,  # 最大模拟轮数（可选，用于截断过长的模拟）
+        max_rounds: int = None,  # 最大simulation rounds（可选，用于截断过长的模拟）
         enable_graph_memory_update: bool = False,  # 是否将活动更新到Zep图谱
-        graph_id: str = None  # Zep图谱ID（启用图谱更新时必需）
+        graph_id: str = None  # ZepGraph ID（启用图谱更新时必需）
     ) -> SimulationRunState:
         """
         启动模拟
@@ -323,9 +323,9 @@ class SimulationRunner:
         Args:
             simulation_id: 模拟ID
             platform: 运行平台 (twitter/reddit/parallel)
-            max_rounds: 最大模拟轮数（可选，用于截断过长的模拟）
+            max_rounds: 最大simulation rounds（可选，用于截断过长的模拟）
             enable_graph_memory_update: 是否将Agent活动动态更新到Zep图谱
-            graph_id: Zep图谱ID（启用图谱更新时必需）
+            graph_id: ZepGraph ID（启用图谱更新时必需）
             
         Returns:
             SimulationRunState
@@ -351,7 +351,7 @@ class SimulationRunner:
         minutes_per_round = time_config.get("minutes_per_round", 30)
         total_rounds = int(total_hours * 60 / minutes_per_round)
         
-        # 如果指定了最大轮数，则截断
+        # 如果指定了max rounds，则截断
         if max_rounds is not None and max_rounds > 0:
             original_rounds = total_rounds
             total_rounds = min(total_rounds, max_rounds)
@@ -418,7 +418,7 @@ class SimulationRunner:
                 "--config", config_path,  # 使用完整配置文件路径
             ]
             
-            # 如果指定了最大轮数，添加到命令行参数
+            # 如果指定了max rounds，添加到命令行参数
             if max_rounds is not None and max_rounds > 0:
                 cmd.extend(["--max-rounds", str(max_rounds)])
             
@@ -614,32 +614,32 @@ class SimulationRunner:
                             if "event_type" in action_data:
                                 event_type = action_data.get("event_type")
                                 
-                                # 检测 simulation_end 事件，标记平台已完成
+                                # 检测 simulation_end 事件，标记平台Done
                                 if event_type == "simulation_end":
                                     if platform == "twitter":
                                         state.twitter_completed = True
                                         state.twitter_running = False
-                                        logger.info(f"Twitter 模拟已完成: {state.simulation_id}, total_rounds={action_data.get('total_rounds')}, total_actions={action_data.get('total_actions')}")
+                                        logger.info(f"Twitter 模拟Done: {state.simulation_id}, total_rounds={action_data.get('total_rounds')}, total_actions={action_data.get('total_actions')}")
                                     elif platform == "reddit":
                                         state.reddit_completed = True
                                         state.reddit_running = False
-                                        logger.info(f"Reddit 模拟已完成: {state.simulation_id}, total_rounds={action_data.get('total_rounds')}, total_actions={action_data.get('total_actions')}")
+                                        logger.info(f"Reddit 模拟Done: {state.simulation_id}, total_rounds={action_data.get('total_rounds')}, total_actions={action_data.get('total_actions')}")
                                     
-                                    # 检查是否所有启用的平台都已完成
+                                    # 检查是否所有启用的平台都Done
                                     # 如果只运行了一个平台，只检查那个平台
                                     # 如果运行了两个平台，需要两个都完成
                                     all_completed = cls._check_all_platforms_completed(state)
                                     if all_completed:
                                         state.runner_status = RunnerStatus.COMPLETED
                                         state.completed_at = datetime.now().isoformat()
-                                        logger.info(f"所有平台模拟已完成: {state.simulation_id}")
+                                        logger.info(f"所有平台模拟Done: {state.simulation_id}")
                                 
-                                # 更新轮次信息（从 round_end 事件）
+                                # 更新round信息（从 round_end 事件）
                                 elif event_type == "round_end":
                                     round_num = action_data.get("round", 0)
                                     simulated_hours = action_data.get("simulated_hours", 0)
                                     
-                                    # 更新各平台独立的轮次和时间
+                                    # 更新各平台独立的round和时间
                                     if platform == "twitter":
                                         if round_num > state.twitter_current_round:
                                             state.twitter_current_round = round_num
@@ -649,7 +649,7 @@ class SimulationRunner:
                                             state.reddit_current_round = round_num
                                         state.reddit_simulated_hours = simulated_hours
                                     
-                                    # 总体轮次取两个平台的最大值
+                                    # 总体round取两个平台的最大值
                                     if round_num > state.current_round:
                                         state.current_round = round_num
                                     # 总体时间取两个平台的最大值
@@ -670,7 +670,7 @@ class SimulationRunner:
                             )
                             state.add_action(action)
                             
-                            # 更新轮次
+                            # 更新round
                             if action.round_num and action.round_num > state.current_round:
                                 state.current_round = action.round_num
                             
@@ -688,12 +688,12 @@ class SimulationRunner:
     @classmethod
     def _check_all_platforms_completed(cls, state: SimulationRunState) -> bool:
         """
-        检查所有启用的平台是否都已完成模拟
+        检查所有启用的平台是否都Done模拟
         
         通过检查对应的 actions.jsonl 文件是否存在来判断平台是否被启用
         
         Returns:
-            True 如果所有启用的平台都已完成
+            True 如果所有启用的平台都Done
         """
         sim_dir = os.path.join(cls.RUN_STATE_DIR, state.simulation_id)
         twitter_log = os.path.join(sim_dir, "twitter", "actions.jsonl")
@@ -709,7 +709,7 @@ class SimulationRunner:
         if reddit_enabled and not state.reddit_completed:
             return False
         
-        # 至少有一个平台被启用且已完成
+        # 至少有一个平台被启用且Done
         return twitter_enabled or reddit_enabled
     
     @classmethod
@@ -833,7 +833,7 @@ class SimulationRunner:
             default_platform: 默认平台（当动作记录中没有 platform 字段时使用）
             platform_filter: 过滤平台
             agent_id: 过滤 Agent ID
-            round_num: 过滤轮次
+            round_num: 过滤round
         """
         if not os.path.exists(file_path):
             return []
@@ -900,7 +900,7 @@ class SimulationRunner:
             simulation_id: 模拟ID
             platform: 过滤平台（twitter/reddit）
             agent_id: 过滤Agent
-            round_num: 过滤轮次
+            round_num: 过滤round
             
         Returns:
             完整的动作列表（按时间戳排序，新的在前）
@@ -965,7 +965,7 @@ class SimulationRunner:
             offset: 偏移量
             platform: 过滤平台
             agent_id: 过滤Agent
-            round_num: 过滤轮次
+            round_num: 过滤round
             
         Returns:
             动作列表
@@ -988,19 +988,19 @@ class SimulationRunner:
         end_round: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """
-        获取模拟时间线（按轮次汇总）
+        获取模拟时间线（按round汇总）
         
         Args:
             simulation_id: 模拟ID
-            start_round: 起始轮次
-            end_round: 结束轮次
+            start_round: 起始round
+            end_round: 结束round
             
         Returns:
-            每轮的汇总信息
+            per round的汇总信息
         """
         actions = cls.get_actions(simulation_id, limit=10000)
         
-        # 按轮次分组
+        # 按round分组
         rounds: Dict[int, Dict[str, Any]] = {}
         
         for action in actions:
@@ -1097,7 +1097,7 @@ class SimulationRunner:
     @classmethod
     def cleanup_simulation_logs(cls, simulation_id: str) -> Dict[str, Any]:
         """
-        清理模拟的运行日志（用于强制重新开始模拟）
+        清理模拟的运行日志（用于强制重新Run simulation）
         
         会删除以下文件：
         - run_state.json

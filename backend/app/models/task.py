@@ -1,6 +1,6 @@
 """
 任务状态管理
-用于跟踪长时间运行的任务（如图谱构建）
+用于跟踪长时间运行的任务（如Graph build）
 """
 
 import uuid
@@ -13,9 +13,9 @@ from dataclasses import dataclass, field
 
 class TaskStatus(str, Enum):
     """任务状态枚举"""
-    PENDING = "pending"          # 等待中
+    PENDING = "pending"          # Waiting
     PROCESSING = "processing"    # 处理中
-    COMPLETED = "completed"      # 已完成
+    COMPLETED = "completed"      # Done
     FAILED = "failed"            # 失败
 
 

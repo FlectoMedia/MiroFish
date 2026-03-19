@@ -4,8 +4,8 @@
 
 通过文件系统实现简单的命令/响应模式：
 1. Flask写入命令到 commands/ 目录
-2. 模拟脚本轮询命令目录，执行命令并写入响应到 responses/ 目录
-3. Flask轮询响应目录获取结果
+2. 模拟脚本polling命令目录，执行命令并写入响应到 responses/ 目录
+3. Flaskpolling响应目录获取结果
 """
 
 import os
@@ -128,7 +128,7 @@ class SimulationIPCClient:
             command_type: 命令类型
             args: 命令参数
             timeout: 超时时间（秒）
-            poll_interval: 轮询间隔（秒）
+            poll_interval: polling间隔（秒）
             
         Returns:
             IPCResponse
@@ -289,7 +289,7 @@ class SimulationIPCServer:
     """
     模拟IPC服务器（模拟脚本端使用）
     
-    轮询命令目录，执行命令并返回响应
+    polling命令目录，执行命令并返回响应
     """
     
     def __init__(self, simulation_dir: str):
@@ -331,7 +331,7 @@ class SimulationIPCServer:
     
     def poll_commands(self) -> Optional[IPCCommand]:
         """
-        轮询命令目录，返回第一个待处理的命令
+        polling命令目录，返回第一个待处理的命令
         
         Returns:
             IPCCommand 或 None

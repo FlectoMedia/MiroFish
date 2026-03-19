@@ -206,7 +206,7 @@ class RetryableAPIClient:
             items: 要处理的项目列表
             process_func: 处理函数，接收单个item作为参数
             exceptions: 需要重试的异常类型
-            continue_on_failure: 单项失败后是否继续处理其他项
+            continue_on_failure: 单项失败后是否继续处理Other项
             
         Returns:
             (成功结果列表, 失败项列表)

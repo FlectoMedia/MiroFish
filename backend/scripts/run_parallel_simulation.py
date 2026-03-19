@@ -254,7 +254,7 @@ class ParallelIPCHandler:
             }, f, ensure_ascii=False, indent=2)
     
     def poll_command(self) -> Optional[Dict[str, Any]]:
-        """轮询获取待处理命令"""
+        """polling获取待处理命令"""
         if not os.path.exists(self.commands_dir):
             return None
         
@@ -408,7 +408,7 @@ class ParallelIPCHandler:
             print(f"  Interview完成: agent_id={agent_id}, 成功平台数={success_count}/{len(platforms_to_interview)}")
             return True
         else:
-            errors = [f"{p}: {r.get('error', '未知错误')}" for p, r in results["platforms"].items()]
+            errors = [f"{p}: {r.get('error', 'Unknown error')}" for p, r in results["platforms"].items()]
             self.send_response(command_id, "failed", error="; ".join(errors))
             print(f"  Interview失败: agent_id={agent_id}, 所有平台都失败")
             return False
@@ -508,7 +508,7 @@ class ParallelIPCHandler:
                 "interviews_count": len(results),
                 "results": results
             })
-            print(f"  批量Interview完成: {len(results)} 个Agent")
+            print(f"  批量Interview完成: {len(results)} Agent")
             return True
         else:
             self.send_response(command_id, "failed", error="没有成功的采访")
@@ -1043,7 +1043,7 @@ def get_active_agents_for_round(
     current_hour: int,
     round_num: int
 ) -> List:
-    """根据时间和配置决定本轮激活哪些Agent"""
+    """根据时间和配置决定this round激活哪些Agent"""
     time_config = config.get("time_config", {})
     agent_configs = config.get("agent_configs", [])
     
@@ -1112,7 +1112,7 @@ async def run_twitter_simulation(
         simulation_dir: 模拟目录
         action_logger: 动作日志记录器
         main_logger: 主日志管理器
-        max_rounds: 最大模拟轮数（可选，用于截断过长的模拟）
+        max_rounds: 最大simulation rounds（可选，用于截断过长的模拟）
         
     Returns:
         PlatformSimulation: 包含env和agent_graph的结果对象
@@ -1216,7 +1216,7 @@ async def run_twitter_simulation(
     minutes_per_round = time_config.get("minutes_per_round", 30)
     total_rounds = (total_hours * 60) // minutes_per_round
     
-    # 如果指定了最大轮数，则截断
+    # 如果指定了max rounds，则截断
     if max_rounds is not None and max_rounds > 0:
         original_rounds = total_rounds
         total_rounds = min(total_rounds, max_rounds)
@@ -1229,7 +1229,7 @@ async def run_twitter_simulation(
         # 检查是否收到退出信号
         if _shutdown_event and _shutdown_event.is_set():
             if main_logger:
-                main_logger.info(f"收到退出信号，在第 {round_num + 1} 轮停止模拟")
+                main_logger.info(f"收到退出信号，在第 {round_num + 1} rounds停止模拟")
             break
         
         simulated_minutes = round_num * minutes_per_round
@@ -1304,7 +1304,7 @@ async def run_reddit_simulation(
         simulation_dir: 模拟目录
         action_logger: 动作日志记录器
         main_logger: 主日志管理器
-        max_rounds: 最大模拟轮数（可选，用于截断过长的模拟）
+        max_rounds: 最大simulation rounds（可选，用于截断过长的模拟）
         
     Returns:
         PlatformSimulation: 包含env和agent_graph的结果对象
@@ -1415,7 +1415,7 @@ async def run_reddit_simulation(
     minutes_per_round = time_config.get("minutes_per_round", 30)
     total_rounds = (total_hours * 60) // minutes_per_round
     
-    # 如果指定了最大轮数，则截断
+    # 如果指定了max rounds，则截断
     if max_rounds is not None and max_rounds > 0:
         original_rounds = total_rounds
         total_rounds = min(total_rounds, max_rounds)
@@ -1428,7 +1428,7 @@ async def run_reddit_simulation(
         # 检查是否收到退出信号
         if _shutdown_event and _shutdown_event.is_set():
             if main_logger:
-                main_logger.info(f"收到退出信号，在第 {round_num + 1} 轮停止模拟")
+                main_logger.info(f"收到退出信号，在第 {round_num + 1} rounds停止模拟")
             break
         
         simulated_minutes = round_num * minutes_per_round
@@ -1511,7 +1511,7 @@ async def main():
         '--max-rounds',
         type=int,
         default=None,
-        help='最大模拟轮数（可选，用于截断过长的模拟）'
+        help='最大simulation rounds（可选，用于截断过长的模拟）'
     )
     parser.add_argument(
         '--no-wait',
@@ -1555,11 +1555,11 @@ async def main():
     config_total_rounds = (total_hours * 60) // minutes_per_round
     
     log_manager.info(f"模拟参数:")
-    log_manager.info(f"  - 总模拟时长: {total_hours}小时")
-    log_manager.info(f"  - 每轮时间: {minutes_per_round}分钟")
-    log_manager.info(f"  - 配置总轮数: {config_total_rounds}")
+    log_manager.info(f"  - 总Duration: {total_hours}小时")
+    log_manager.info(f"  - per round时间: {minutes_per_round}分钟")
+    log_manager.info(f"  - 配置total rounds: {config_total_rounds}")
     if args.max_rounds:
-        log_manager.info(f"  - 最大轮数限制: {args.max_rounds}")
+        log_manager.info(f"  - max rounds限制: {args.max_rounds}")
         if args.max_rounds < config_total_rounds:
             log_manager.info(f"  - 实际执行轮数: {args.max_rounds} (已截断)")
     log_manager.info(f"  - Agent数量: {len(config.get('agent_configs', []))}")
@@ -1652,7 +1652,7 @@ async def main():
 
 def setup_signal_handlers(loop=None):
     """
-    设置信号处理器，确保收到 SIGTERM/SIGINT 时能够正确退出
+    设置信号处理器，确保Received SIGTERM/SIGINT 时能够正确退出
     
     持久化模拟场景：模拟完成后不退出，等待 interview 命令
     当收到终止信号时，需要：
@@ -1663,7 +1663,7 @@ def setup_signal_handlers(loop=None):
     def signal_handler(signum, frame):
         global _cleanup_done
         sig_name = "SIGTERM" if signum == signal.SIGTERM else "SIGINT"
-        print(f"\n收到 {sig_name} 信号，正在退出...")
+        print(f"\nReceived {sig_name} 信号，正在退出...")
         
         if not _cleanup_done:
             _cleanup_done = True

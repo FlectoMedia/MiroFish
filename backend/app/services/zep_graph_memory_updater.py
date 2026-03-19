@@ -35,7 +35,7 @@ class AgentActivity:
         """
         将活动转换为可以发送给Zep的文本描述
         
-        采用自然语言描述格式，让Zep能够从中提取实体和关系
+        采用自然语言描述格式，让Zep能够从中提取实体和Relations
         不添加模拟相关的前缀，避免误导图谱更新
         """
         # 根据不同的动作类型生成不同的描述
@@ -217,8 +217,8 @@ class ZepGraphMemoryUpdater:
     
     # 平台名称映射（用于控制台显示）
     PLATFORM_DISPLAY_NAMES = {
-        'twitter': '世界1',
-        'reddit': '世界2',
+        'twitter': 'World 1',
+        'reddit': 'World 2',
     }
     
     # 发送间隔（秒），避免请求过快
@@ -233,7 +233,7 @@ class ZepGraphMemoryUpdater:
         初始化更新器
         
         Args:
-            graph_id: Zep图谱ID
+            graph_id: ZepGraph ID
             api_key: Zep API Key（可选，默认从配置读取）
         """
         self.graph_id = graph_id
@@ -487,7 +487,7 @@ class ZepGraphMemoryManager:
         
         Args:
             simulation_id: 模拟ID
-            graph_id: Zep图谱ID
+            graph_id: ZepGraph ID
             
         Returns:
             ZepGraphMemoryUpdater实例

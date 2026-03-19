@@ -1,5 +1,5 @@
 """
-图谱构建服务
+Graph build服务
 接口2：使用Zep API构建Standalone Graph
 """
 
@@ -38,7 +38,7 @@ class GraphInfo:
 
 class GraphBuilderService:
     """
-    图谱构建服务
+    Graph build服务
     负责调用Zep API构建知识图谱
     """
     
@@ -103,7 +103,7 @@ class GraphBuilderService:
         chunk_overlap: int,
         batch_size: int
     ):
-        """图谱构建工作线程"""
+        """Graph build工作线程"""
         try:
             self.task_manager.update_task(
                 task_id,
@@ -134,7 +134,7 @@ class GraphBuilderService:
             self.task_manager.update_task(
                 task_id,
                 progress=20,
-                message=f"文本已分割为 {total_chunks} 个块"
+                message=f"文本已分割为 {total_chunks} 块"
             )
             
             # 4. 分批发送数据
@@ -216,7 +216,7 @@ class GraphBuilderService:
                 return f"entity_{attr_name}"
             return attr_name
         
-        # 动态创建实体类型
+        # 动态创建Entity types
         entity_types = {}
         for entity_def in ontology.get("entity_types", []):
             name = entity_def["name"]
@@ -333,7 +333,7 @@ class GraphBuilderService:
                 
             except Exception as e:
                 if progress_callback:
-                    progress_callback(f"批次 {batch_num} 发送失败: {str(e)}", 0)
+                    progress_callback(f"批次 {batch_num} Send failed: {str(e)}", 0)
                 raise
         
         return episode_uuids
@@ -356,13 +356,13 @@ class GraphBuilderService:
         total_episodes = len(episode_uuids)
         
         if progress_callback:
-            progress_callback(f"开始等待 {total_episodes} 个文本块处理...", 0)
+            progress_callback(f"开始等待 {total_episodes} 文本块处理...", 0)
         
         while pending_episodes:
             if time.time() - start_time > timeout:
                 if progress_callback:
                     progress_callback(
-                        f"部分文本块超时，已完成 {completed_count}/{total_episodes}",
+                        f"部分文本块超时，Done {completed_count}/{total_episodes}",
                         completed_count / total_episodes
                     )
                 break
@@ -402,7 +402,7 @@ class GraphBuilderService:
         # 获取边（分页）
         edges = fetch_all_edges(self.client, graph_id)
 
-        # 统计实体类型
+        # 统计Entity types
         entity_types = set()
         for node in nodes:
             if node.labels:
@@ -422,7 +422,7 @@ class GraphBuilderService:
         获取完整图谱数据（包含详细信息）
         
         Args:
-            graph_id: 图谱ID
+            graph_id: Graph ID
             
         Returns:
             包含nodes和edges的字典，包括时间信息、属性等详细数据

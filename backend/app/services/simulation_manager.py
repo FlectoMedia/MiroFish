@@ -118,7 +118,7 @@ class SimulationManager:
     核心功能：
     1. 从Zep图谱读取实体并过滤
     2. 生成OASIS Agent Profile
-    3. 使用LLM智能生成模拟配置参数
+    3. 使用LLM智能Generating simulation config参数
     4. 准备预设脚本所需的所有文件
     """
     
@@ -201,8 +201,8 @@ class SimulationManager:
         创建新的模拟
         
         Args:
-            project_id: 项目ID
-            graph_id: Zep图谱ID
+            project_id: Project ID
+            graph_id: ZepGraph ID
             enable_twitter: 是否启用Twitter模拟
             enable_reddit: 是否启用Reddit模拟
             
@@ -242,15 +242,15 @@ class SimulationManager:
         步骤：
         1. 从Zep图谱读取并过滤实体
         2. 为每个实体生成OASIS Agent Profile（可选LLM增强，支持并行）
-        3. 使用LLM智能生成模拟配置参数（时间、活跃度、发言频率等）
+        3. 使用LLM智能Generating simulation config参数（时间、Activity、发言频率等）
         4. 保存配置文件和Profile文件
         5. 复制预设脚本到模拟目录
         
         Args:
             simulation_id: 模拟ID
-            simulation_requirement: 模拟需求描述（用于LLM生成配置）
+            simulation_requirement: Simulation requirement描述（用于LLM生成配置）
             document_text: 原始文档内容（用于LLM理解背景）
-            defined_entity_types: 预定义的实体类型（可选）
+            defined_entity_types: 预定义的Entity types（可选）
             use_llm_for_profiles: 是否使用LLM生成详细人设
             progress_callback: 进度回调函数 (stage, progress, message)
             parallel_profile_count: 并行生成人设的数量，默认3
@@ -289,7 +289,7 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "reading", 100, 
-                    f"完成，共 {filtered.filtered_count} 个实体",
+                    f"完成，共 {filtered.filtered_count} 实体",
                     current=filtered.filtered_count,
                     total=filtered.filtered_count
                 )
@@ -375,16 +375,16 @@ class SimulationManager:
             if progress_callback:
                 progress_callback(
                     "generating_profiles", 100, 
-                    f"完成，共 {len(profiles)} 个Profile",
+                    f"完成，共 {len(profiles)} Profile",
                     current=len(profiles),
                     total=len(profiles)
                 )
             
-            # ========== 阶段3: LLM智能生成模拟配置 ==========
+            # ========== 阶段3: LLM智能Generating simulation config ==========
             if progress_callback:
                 progress_callback(
                     "generating_config", 0, 
-                    "正在分析模拟需求...",
+                    "正在分析Simulation requirement...",
                     current=0,
                     total=3
                 )
@@ -441,13 +441,13 @@ class SimulationManager:
             state.status = SimulationStatus.READY
             self._save_simulation_state(state)
             
-            logger.info(f"模拟准备完成: {simulation_id}, "
+            logger.info(f"模拟Ready: {simulation_id}, "
                        f"entities={state.entities_count}, profiles={state.profiles_count}")
             
             return state
             
         except Exception as e:
-            logger.error(f"模拟准备失败: {simulation_id}, error={str(e)}")
+            logger.error(f"模拟Prepare failed: {simulation_id}, error={str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             state.status = SimulationStatus.FAILED

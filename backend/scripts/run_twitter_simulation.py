@@ -168,7 +168,7 @@ class IPCHandler:
             }, f, ensure_ascii=False, indent=2)
     
     def poll_command(self) -> Optional[Dict[str, Any]]:
-        """轮询获取待处理命令"""
+        """polling获取待处理命令"""
         if not os.path.exists(self.commands_dir):
             return None
         
@@ -288,7 +288,7 @@ class IPCHandler:
                 "interviews_count": len(results),
                 "results": results
             })
-            print(f"  批量Interview完成: {len(results)} 个Agent")
+            print(f"  批量Interview完成: {len(results)} Agent")
             return True
             
         except Exception as e:
@@ -466,7 +466,7 @@ class TwitterSimulationRunner:
         round_num: int
     ) -> List:
         """
-        根据时间和配置决定本轮激活哪些Agent
+        根据时间和配置决定this round激活哪些Agent
         
         Args:
             env: OASIS环境
@@ -507,7 +507,7 @@ class TwitterSimulationRunner:
             if current_hour not in active_hours:
                 continue
             
-            # 根据活跃度计算概率
+            # 根据Activity计算概率
             if random.random() < activity_level:
                 candidates.append(agent_id)
         
@@ -532,7 +532,7 @@ class TwitterSimulationRunner:
         """运行Twitter模拟
         
         Args:
-            max_rounds: 最大模拟轮数（可选，用于截断过长的模拟）
+            max_rounds: 最大simulation rounds（可选，用于截断过长的模拟）
         """
         print("=" * 60)
         print("OASIS Twitter模拟")
@@ -546,10 +546,10 @@ class TwitterSimulationRunner:
         total_hours = time_config.get("total_simulation_hours", 72)
         minutes_per_round = time_config.get("minutes_per_round", 30)
         
-        # 计算总轮数
+        # 计算total rounds
         total_rounds = (total_hours * 60) // minutes_per_round
         
-        # 如果指定了最大轮数，则截断
+        # 如果指定了max rounds，则截断
         if max_rounds is not None and max_rounds > 0:
             original_rounds = total_rounds
             total_rounds = min(total_rounds, max_rounds)
@@ -557,11 +557,11 @@ class TwitterSimulationRunner:
                 print(f"\n轮数已截断: {original_rounds} -> {total_rounds} (max_rounds={max_rounds})")
         
         print(f"\n模拟参数:")
-        print(f"  - 总模拟时长: {total_hours}小时")
-        print(f"  - 每轮时间: {minutes_per_round}分钟")
-        print(f"  - 总轮数: {total_rounds}")
+        print(f"  - 总Duration: {total_hours}小时")
+        print(f"  - per round时间: {minutes_per_round}分钟")
+        print(f"  - total rounds: {total_rounds}")
         if max_rounds:
-            print(f"  - 最大轮数限制: {max_rounds}")
+            print(f"  - max rounds限制: {max_rounds}")
         print(f"  - Agent数量: {len(self.config.get('agent_configs', []))}")
         
         # 创建模型
@@ -627,7 +627,7 @@ class TwitterSimulationRunner:
                 print(f"  已发布 {len(initial_actions)} 条初始帖子")
         
         # 主模拟循环
-        print("\n开始模拟循环...")
+        print("\nRun simulation循环...")
         start_time = datetime.now()
         
         for round_num in range(total_rounds):
@@ -636,7 +636,7 @@ class TwitterSimulationRunner:
             simulated_hour = (simulated_minutes // 60) % 24
             simulated_day = simulated_minutes // (60 * 24) + 1
             
-            # 获取本轮激活的Agent
+            # 获取this round激活的Agent
             active_agents = self._get_active_agents_for_round(
                 self.env, simulated_hour, round_num
             )
@@ -716,7 +716,7 @@ async def main():
         '--max-rounds',
         type=int,
         default=None,
-        help='最大模拟轮数（可选，用于截断过长的模拟）'
+        help='最大simulation rounds（可选，用于截断过长的模拟）'
     )
     parser.add_argument(
         '--no-wait',
@@ -748,13 +748,13 @@ async def main():
 
 def setup_signal_handlers():
     """
-    设置信号处理器，确保收到 SIGTERM/SIGINT 时能够正确退出
+    设置信号处理器，确保Received SIGTERM/SIGINT 时能够正确退出
     让程序有机会正常清理资源（关闭数据库、环境等）
     """
     def signal_handler(signum, frame):
         global _cleanup_done
         sig_name = "SIGTERM" if signum == signal.SIGTERM else "SIGINT"
-        print(f"\n收到 {sig_name} 信号，正在退出...")
+        print(f"\nReceived {sig_name} 信号，正在退出...")
         if not _cleanup_done:
             _cleanup_done = True
             if _shutdown_event:
